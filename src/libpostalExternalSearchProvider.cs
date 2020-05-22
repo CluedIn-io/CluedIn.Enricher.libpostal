@@ -231,8 +231,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 			metadata.Name = request.EntityMetaData.Name;
 			//metadata.Description = resultItem.Data.description;
 			metadata.OriginEntityCode = code;
-			//foreach (var item in resultItem.Data)
-			//{
+
 			switch (resultItem.Data.label)
 			{
 				case "house":
@@ -295,13 +294,8 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 				case "world_region":
 					metadata.Properties[libpostalVocabulary.Location.World_region] = resultItem.Data.value;
 					break;
-					//}
 			}
-			//foreach (var item in request.EntityMetaData.Codes)
-			//{
-			//	metadata.Codes.Add(new EntityCode(item.Type, item.Origin, item.Value));
-			//}
-			//metadata.Codes.Add(new EntityCode(EntityType.Person, CodeOrigin.CluedIn, resultItem.Id));
+
 			metadata.Codes.Add(code);
 		}
 	}
