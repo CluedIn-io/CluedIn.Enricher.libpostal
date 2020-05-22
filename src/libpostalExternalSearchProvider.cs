@@ -235,64 +235,64 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 			switch (resultItem.Data.label)
 			{
 				case "house":
-					metadata.Properties[libpostalVocabulary.Location.House] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.House] = resultItem.Data.value;
 					break;
 				case "category":
-					metadata.Properties[libpostalVocabulary.Location.Category] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Category] = resultItem.Data.value;
 					break;
 				case "near":
-					metadata.Properties[libpostalVocabulary.Location.Near] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Near] = resultItem.Data.value;
 					break;
 				case "house_number":
-					metadata.Properties[libpostalVocabulary.Location.House_number] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.House_number] = resultItem.Data.value;
 					break;
 				case "road":
-					metadata.Properties[libpostalVocabulary.Location.Road] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Road] = resultItem.Data.value;
 					break;
 				case "unit":
-					metadata.Properties[libpostalVocabulary.Location.Unit] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Unit] = resultItem.Data.value;
 					break;
 				case "level":
-					metadata.Properties[libpostalVocabulary.Location.Level] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Level] = resultItem.Data.value;
 					break;
 				case "staircase":
-					metadata.Properties[libpostalVocabulary.Location.Staircase] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Staircase] = resultItem.Data.value;
 					break;
 				case "entrance":
-					metadata.Properties[libpostalVocabulary.Location.Entrance] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Entrance] = resultItem.Data.value;
 					break;
 				case "po_box":
-					metadata.Properties[libpostalVocabulary.Location.Po_box] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Po_box] = resultItem.Data.value;
 					break;
 				case "postcode":
-					metadata.Properties[libpostalVocabulary.Location.Postcode] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Postcode] = resultItem.Data.value;
 					break;
 				case "suburb":
-					metadata.Properties[libpostalVocabulary.Location.Suburb] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Suburb] = resultItem.Data.value;
 					break;
 				case "city_district":
-					metadata.Properties[libpostalVocabulary.Location.City_district] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.City_district] = resultItem.Data.value;
 					break;
 				case "city":
-					metadata.Properties[libpostalVocabulary.Location.City] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.City] = resultItem.Data.value;
 					break;
 				case "island":
-					metadata.Properties[libpostalVocabulary.Location.Island] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Island] = resultItem.Data.value;
 					break;
 				case "state_district":
-					metadata.Properties[libpostalVocabulary.Location.State_district] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.State_district] = resultItem.Data.value;
 					break;
 				case "state":
-					metadata.Properties[libpostalVocabulary.Location.State] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.State] = resultItem.Data.value;
 					break;
 				case "country_region":
-					metadata.Properties[libpostalVocabulary.Location.Country_region] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Country_region] = resultItem.Data.value;
 					break;
 				case "country":
-					metadata.Properties[libpostalVocabulary.Location.Country] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.Country] = resultItem.Data.value;
 					break;
 				case "world_region":
-					metadata.Properties[libpostalVocabulary.Location.World_region] = resultItem.Data.value;
+					metadata.Properties[libpostalVocabulary.Person.World_region] = resultItem.Data.value;
 					break;
 			}
 
