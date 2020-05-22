@@ -158,7 +158,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		{
 			if (result is IExternalSearchQueryResult<libpostalResponse> libpostalResult)
 			{
-				var code = this.GetOriginEntityCode(libpostalResult);
+				var code = this.GetOriginEntityCode(libpostalResult, request);
 				var clue = new Clue(code, context.Organization);
 				clue.Data.EntityData.Codes.Add(request.EntityMetaData.Codes.First());
 				this.PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
@@ -206,10 +206,9 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		/// <summary>Gets the origin entity code.</summary>
 		/// <param name="resultItem">The result item.</param>
 		/// <returns>The origin entity code.</returns>
-		private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<libpostalResponse> resultItem)
+		private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
 		{
-			//if(resultItem.
-			return new EntityCode(EntityType.Person, this.GetCodeOrigin(), resultItem.Id.ToString());
+			return new EntityCode(request.EntityMetaData.EntityType, this.GetCodeOrigin(), resultItem.Id.ToString());
 		}
 
 		/// <summary>Gets the code origin.</summary>
@@ -224,7 +223,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		/// <param name="resultItem">The result item.</param>
 		private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
 		{
-			var code = this.GetOriginEntityCode(resultItem);
+			var code = this.GetOriginEntityCode(resultItem, request);
 
 			metadata.EntityType = request.EntityMetaData.EntityType;
 
