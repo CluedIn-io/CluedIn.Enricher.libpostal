@@ -35,7 +35,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
          **********************************************************************************************************/
 
 		public libpostalExternalSearchProvider()
-			: base(ProviderId, entityTypes: new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User })
+			: base(ProviderId, entityTypes: new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, "/LegalEntity" })
 		{
 		}
 
