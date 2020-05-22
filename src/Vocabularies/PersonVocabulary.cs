@@ -44,6 +44,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
             this.AddMapping(this.Po_box, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressPostOfficeBox);
             this.AddMapping(this.Level, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressFloorCode);
             this.AddMapping(this.House_number, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressStreetNumber);
+            this.AddMapping(this.Postcode, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressZipCode);
 
         }
 

@@ -37,13 +37,14 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
                 this.World_region = group.Add(new VocabularyKey("World_region", VocabularyKeyDataType.Text, VocabularyKeyVisibility.Visible));
             });
 
-            //this.AddMapping(this.Country, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressCountryCode);
-            //this.AddMapping(this.City, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressCity);
-            //this.AddMapping(this.State, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressState);
-            //this.AddMapping(this.Road, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressStreetName);
-            //this.AddMapping(this.Po_box, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressPostOfficeBox);
-            //this.AddMapping(this.Level, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressFloorCode);
-            //this.AddMapping(this.House_number, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddressStreetNumber);
+            this.AddMapping(this.Country, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressCountryCode);
+            this.AddMapping(this.City, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressCity);
+            this.AddMapping(this.State, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressState);
+            this.AddMapping(this.Road, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressStreetName);
+            this.AddMapping(this.Po_box, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressPostOfficeBox);
+            this.AddMapping(this.Level, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressFloorCode);
+            this.AddMapping(this.House_number, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressStreetNumber);
+            this.AddMapping(this.Postcode, CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddressZipCode);
 
         }
 
