@@ -35,7 +35,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
          **********************************************************************************************************/
 
 		public libpostalExternalSearchProvider()
-			: base(ProviderId, EntityType.Person)
+			: base(ProviderId, entityTypes: new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User })
 		{
 		}
 
@@ -56,7 +56,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 			if (!this.Accepts(request.EntityMetaData.EntityType))
 				yield break;
 
-			var existingResults = request.GetQueryResults<libpostalResponse>(this).ToList();
+			//var existingResults = request.GetQueryResults<libpostalResponse>(this).ToList();
 
 			//bool filter(string value)
 			//{
@@ -64,11 +64,36 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 			//}
 
 			var entityType = request.EntityMetaData.EntityType;
-			var address = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress, new HashSet<string>());
 
-			if (address != null && address.Count > 0)
+			var personAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress, new HashSet<string>());
+			var organizationAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address, new HashSet<string>());
+			var userAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress, new HashSet<string>());
+
+			if (personAddress != null && personAddress.Count > 0)
 			{
-				foreach (var item in address)
+				foreach (var item in personAddress)
+				{
+					var queryBody = new Dictionary<string, string>
+					{
+						{"body", item }
+					};
+					yield return new ExternalSearchQuery(this, entityType, queryBody);
+				}
+			}
+			if (organizationAddress != null && organizationAddress.Count > 0)
+			{
+				foreach (var item in organizationAddress)
+				{
+					var queryBody = new Dictionary<string, string>
+					{
+						{"body", item }
+					};
+					yield return new ExternalSearchQuery(this, entityType, queryBody);
+				}
+			}
+			if (userAddress != null && userAddress.Count > 0)
+			{
+				foreach (var item in userAddress)
 				{
 					var queryBody = new Dictionary<string, string>
 					{
@@ -183,6 +208,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		/// <returns>The origin entity code.</returns>
 		private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<libpostalResponse> resultItem)
 		{
+			//if(resultItem.
 			return new EntityCode(EntityType.Person, this.GetCodeOrigin(), resultItem.Id.ToString());
 		}
 
@@ -200,7 +226,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		{
 			var code = this.GetOriginEntityCode(resultItem);
 
-			metadata.EntityType = EntityType.Person;
+			metadata.EntityType = request.EntityMetaData.EntityType;
 
 			//Name is required, without it the changes are ignored and not added to the entity.
 			metadata.Name = request.EntityMetaData.Name;
@@ -272,11 +298,11 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 					break;
 					//}
 			}
-			foreach (var item in request.EntityMetaData.Codes)
-			{
-				metadata.Codes.Add(new EntityCode(item.Type, item.Origin, item.Value));
-			}
-			metadata.Codes.Add(new EntityCode(EntityType.Person, CodeOrigin.CluedIn, resultItem.Id));
+			//foreach (var item in request.EntityMetaData.Codes)
+			//{
+			//	metadata.Codes.Add(new EntityCode(item.Type, item.Origin, item.Value));
+			//}
+			//metadata.Codes.Add(new EntityCode(EntityType.Person, CodeOrigin.CluedIn, resultItem.Id));
 			metadata.Codes.Add(code);
 		}
 	}
