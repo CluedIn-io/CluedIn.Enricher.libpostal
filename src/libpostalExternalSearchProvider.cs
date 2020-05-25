@@ -43,10 +43,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 		/**********************************************************************************************************
          * METHODS
          **********************************************************************************************************/
-		public override bool Accepts(EntityType entityType)
-		{
-			return true;
-		}
+
 		/// <summary>Builds the queries.</summary>
 		/// <param name="context">The context.</param>
 		/// <param name="request">The request.</param>
