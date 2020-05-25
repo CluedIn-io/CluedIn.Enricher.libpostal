@@ -37,6 +37,6 @@ variables:
   testFolderPath: '$(Build.SourcesDirectory)/test'
 
 steps:
-- template: crawler.default.build.1.yml@templates
+- template: crawler.default.build.yml@templates
 
 - template: documentation.publish.yml@templates
