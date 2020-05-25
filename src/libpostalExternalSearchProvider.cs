@@ -363,7 +363,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 							break;
 					}
 					break;
-				case "/Infrastructure.User":
+				case "/Infrastructure/User":
 					switch (resultItem.Data.label)
 					{
 						case "house":
