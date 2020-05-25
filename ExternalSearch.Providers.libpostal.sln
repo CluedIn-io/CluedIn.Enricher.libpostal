@@ -52,8 +52,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.libpostal.Integration.Tests", "test\integration\Integration.Tests\ExternalSearch.libpostal.Integration.Tests.csproj", "{8CBDF6EB-A861-466E-932B-04CA5917923C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libpostal.Unit.Tests", "libpostal.Unit.Tests\libpostal.Unit.Tests.csproj", "{843795E4-D2AF-4E3F-9B2D-083EA2AD2003}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,10 +66,6 @@ Global
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{843795E4-D2AF-4E3F-9B2D-083EA2AD2003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{843795E4-D2AF-4E3F-9B2D-083EA2AD2003}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{843795E4-D2AF-4E3F-9B2D-083EA2AD2003}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{843795E4-D2AF-4E3F-9B2D-083EA2AD2003}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,7 +79,6 @@ Global
 		{2C3AECCF-DCB5-4ED7-8B7B-8F373EDE3A5E} = {9BD54E81-D9C8-4419-82B8-8EE6CC7E2647}
 		{17EE3C8D-BAE4-481A-B9CC-1BE878E86124} = {9BD54E81-D9C8-4419-82B8-8EE6CC7E2647}
 		{8CBDF6EB-A861-466E-932B-04CA5917923C} = {DBD1964B-DBD9-4C70-96CA-391C34B3D75F}
-		{843795E4-D2AF-4E3F-9B2D-083EA2AD2003} = {A32B6852-82C7-4107-8C68-AE9232289E09}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A61CB42-80C5-4A83-AC3E-DA41FC875525}
