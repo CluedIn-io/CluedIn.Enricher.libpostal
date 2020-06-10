@@ -13,11 +13,13 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
             Person = new PersonVocabulary();
             Organization = new OrganizationVocabulary();
             User = new UserVocabulary();
+            Location = new LocationVocabulary();
 
         }
 
         public static PersonVocabulary Person { get; private set; }
         public static OrganizationVocabulary Organization { get; private set; }
         public static UserVocabulary User { get; private set; }
+        public static LocationVocabulary Location { get; private set; }
     }
 }
