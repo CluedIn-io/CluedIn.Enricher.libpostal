@@ -8,7 +8,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
         public LocationVocabulary()
         {
             this.VocabularyName = "libpostal Location";
-            this.KeyPrefix = "libpostal.locaation";
+            this.KeyPrefix = "libpostal.location";
             this.KeySeparator = ".";
             this.Grouping = EntityType.Location;
 
