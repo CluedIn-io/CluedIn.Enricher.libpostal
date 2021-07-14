@@ -16,7 +16,6 @@ using CluedIn.ExternalSearch.Providers.libpostal.Vocabularies;
 using Newtonsoft.Json;
 using RestSharp;
 using Castle.Core.Internal;
-using org.apache.poi.ss.formula.functions;
 //using RestSharp.Contrib;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal
