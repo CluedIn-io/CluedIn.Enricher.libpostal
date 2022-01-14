@@ -1,4 +1,4 @@
-﻿using CluedIn.Core.Data;
+using CluedIn.Core.Data;
 using CluedIn.Core.Data.Vocabularies;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
@@ -19,7 +19,6 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
         public static PersonVocabulary Person { get; private set; }
         public static OrganizationVocabulary Organization { get; private set; }
         public static UserVocabulary User { get; private set; }
-
         public static LocationVocabulary Location { get; private set; }
     }
 }
