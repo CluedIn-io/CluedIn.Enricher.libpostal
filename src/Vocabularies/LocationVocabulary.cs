@@ -1,4 +1,4 @@
-﻿using CluedIn.Core.Data;
+using CluedIn.Core.Data;
 using CluedIn.Core.Data.Vocabularies;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
@@ -71,5 +71,4 @@ namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
         public VocabularyKey World_region { get; set; }
 
     }
-
 }
