@@ -20,10 +20,6 @@ using Constants = CluedIn.ExternalSearch.Providers.Libpostal.Constants;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal
 {
-    public class queryBody
-    {
-        public string query;
-    }
     /// <summary>The libpostal graph external search provider.</summary>
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
     public class libpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
@@ -35,7 +31,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
          **********************************************************************************************************/
 
         public libpostalExternalSearchProvider()
-			: base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
+            : base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
         {
         }
 
@@ -50,7 +46,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The search queries.</returns>
         public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request)
         {
-            if (!this.Accepts(request.EntityMetaData.EntityType))
+            if (!Accepts(request.EntityMetaData.EntityType))
                 yield break;
 
             //var existingResults = request.GetQueryResults<libpostalResponse>(this).ToList();
@@ -121,7 +117,10 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         {
             var url = ConfigurationManager.AppSettings.GetValue<string>("ExternalSearch.libpostal.url", "");
             if (url.IsNullOrEmpty())
-            { throw new Exception("Bad configuration"); }
+            {
+                throw new Exception("Bad configuration");
+            }
+
             var client = new RestClient(url);
             //var client = new RestClient("http://localhost:8080/");
             var request = new RestRequest("parser", Method.POST);
@@ -144,7 +143,6 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Content != null)
-                //foreach (var item in JsonConvert.DeserializeObject<libpostalResponse>(response.Content))
                 {
                     var data = new libpostalResponse();
                     foreach (var item in JsonConvert.DeserializeObject<List<Items>>(response.Content))
@@ -173,10 +171,10 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         {
             if (result is IExternalSearchQueryResult<libpostalResponse> libpostalResult)
             {
-                var code = this.GetOriginEntityCode(libpostalResult, request);
+                var code = GetOriginEntityCode(libpostalResult, request);
                 var clue = new Clue(code, context.Organization);
                 clue.Data.EntityData.Codes.Add(request.EntityMetaData.Codes.First());
-                this.PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
+                PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
             return null;
@@ -191,7 +189,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         {
             if (result is IExternalSearchQueryResult<libpostalResponse> libpostalResult)
             {
-                return this.CreateMetadata(libpostalResult, request);
+                return CreateMetadata(libpostalResult, request);
             }
             return null;
         }
@@ -213,7 +211,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         {
             var metadata = new EntityMetadataPart();
 
-            this.PopulateMetadata(metadata, resultItem, request);
+            PopulateMetadata(metadata, resultItem, request);
 
             return metadata;
         }
@@ -223,7 +221,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The origin entity code.</returns>
         private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            return new EntityCode(request.EntityMetaData.EntityType, this.GetCodeOrigin(), resultItem.Id.ToString());
+            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Id.ToString());
         }
 
         /// <summary>Gets the code origin.</summary>
@@ -239,7 +237,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <param name="resultItem">The result item.</param>
         private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            var code = this.GetOriginEntityCode(resultItem, request);
+            var code = GetOriginEntityCode(resultItem, request);
 
             metadata.EntityType = request.EntityMetaData.EntityType;
 

@@ -3,7 +3,6 @@ using Castle.MicroKernel.Registration;
 using CluedIn.Core;
 using CluedIn.Core.Providers;
 using CluedIn.Core.Server;
-using CluedIn.ExternalSearch.Providers.Libpostal;
 using ComponentHost;
 using Constants = CluedIn.ExternalSearch.Providers.Libpostal.Constants;
 
