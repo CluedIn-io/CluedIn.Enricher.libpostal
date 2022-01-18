@@ -1,24 +1,23 @@
-using CluedIn.Core.Data;
-using CluedIn.Core.Data.Vocabularies;
+using CluedIn.Core.Data.Vocabularies.CluedIn;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal.Vocabularies
 {
     public static class libpostalVocabulary
     {
         /// <summary>
-        /// Initializes static members of the <see cref="KnowledgeGraphVocabulary" /> class.
+        /// Initializes static members of the <see cref="libpostalVocabulary" /> class.
         /// </summary>
         static libpostalVocabulary()
         {
-            Person = new PersonVocabulary();
-            Organization = new OrganizationVocabulary();
-            User = new UserVocabulary();
+            Person = new CluedInPersonVocabulary();
+            Organization = new CluedInOrganizationVocabulary();
+            User = new CluedInUserVocabulary();
             Location = new LocationVocabulary();
         }
 
-        public static PersonVocabulary Person { get; private set; }
-        public static OrganizationVocabulary Organization { get; private set; }
-        public static UserVocabulary User { get; private set; }
+        public static CluedInPersonVocabulary Person { get; private set; }
+        public static CluedInOrganizationVocabulary Organization { get; private set; }
+        public static CluedInUserVocabulary User { get; private set; }
         public static LocationVocabulary Location { get; private set; }
     }
 }

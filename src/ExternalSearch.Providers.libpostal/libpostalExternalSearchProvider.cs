@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
-
 using CluedIn.Core;
 using CluedIn.Core.Data;
 using CluedIn.Core.Data.Parts;
 using CluedIn.Core.Configuration;
-using CluedIn.Crawling.Helpers;
-using CluedIn.ExternalSearch.Filters;
 using CluedIn.ExternalSearch.Providers.libpostal.Models;
 using CluedIn.ExternalSearch.Providers.libpostal.Vocabularies;
 using Newtonsoft.Json;
 using RestSharp;
 using Castle.Core.Internal;
+using CluedIn.Core.Data.Relational;
+using CluedIn.Core.ExternalSearch;
+using CluedIn.Core.Providers;
+using EntityType = CluedIn.Core.Data.EntityType;
+using Constants = CluedIn.ExternalSearch.Providers.Libpostal.Constants;
 
 namespace CluedIn.ExternalSearch.Providers.libpostal
 {
@@ -25,16 +26,16 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
     }
     /// <summary>The libpostal graph external search provider.</summary>
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-    public class libpostalExternalSearchProvider : ExternalSearchProviderBase
+    public class libpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
-        public static readonly Guid ProviderId = Guid.Parse("aba4e4cf-3c48-4828-9fdf-990b22e1a29c");
+        private static readonly EntityType[] AcceptedEntityTypes = new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, EntityType.Location, EntityType.Location.Address, "/LegalEntity" };
 
         /**********************************************************************************************************
          * CONSTRUCTORS
          **********************************************************************************************************/
 
         public libpostalExternalSearchProvider()
-			: base(ProviderId, entityTypes: new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, EntityType.Location, EntityType.Location.Address, "/LegalEntity" })
+			: base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
         {
         }
 
@@ -99,19 +100,18 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
             }
-
-			if (locationAddress != null && locationAddress.Count > 0)
-			{
-				foreach (var item in locationAddress)
-				{
-					var queryBody = new Dictionary<string, string>
-					{
-						{"body", item }
-					};
-					yield return new ExternalSearchQuery(this, entityType, queryBody);
-				}
-			}
-		}
+            if (locationAddress != null && locationAddress.Count > 0)
+            {
+                foreach (var item in locationAddress)
+                {
+                    var queryBody = new Dictionary<string, string>
+                    {
+                        {"body", item }
+                    };
+                    yield return new ExternalSearchQuery(this, entityType, queryBody);
+                }
+            }
+        }
 
         /// <summary>Executes the search.</summary>
         /// <param name="context">The context.</param>
@@ -123,7 +123,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             if (url.IsNullOrEmpty())
             { throw new Exception("Bad configuration"); }
             var client = new RestClient(url);
-            // var client = new RestClient("http://localhost:8080/");
+            //var client = new RestClient("http://localhost:8080/");
             var request = new RestRequest("parser", Method.POST);
             string address = null;
             request.AddHeader("Content-type", "application/json");
@@ -144,10 +144,15 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Content != null)
-                    foreach (var item in JsonConvert.DeserializeObject<List<libpostalResponse>>(response.Content))
+                //foreach (var item in JsonConvert.DeserializeObject<libpostalResponse>(response.Content))
+                {
+                    var data = new libpostalResponse();
+                    foreach (var item in JsonConvert.DeserializeObject<List<Items>>(response.Content))
                     {
-                        yield return new ExternalSearchQueryResult<libpostalResponse>(query, item);
+                        data.Items.Add(item);
                     }
+                    yield return new ExternalSearchQueryResult<libpostalResponse>(query, data);
+                }
             }
             else if (response.StatusCode == HttpStatusCode.NoContent || response.StatusCode == HttpStatusCode.NotFound)
                 yield break;
@@ -228,6 +233,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             return CodeOrigin.CluedIn.CreateSpecific("libpostal");
         }
 
+
         /// <summary>Populates the metadata.</summary>
         /// <param name="metadata">The metadata.</param>
         /// <param name="resultItem">The result item.</param>
@@ -241,271 +247,113 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
             metadata.OriginEntityCode = code;
-            switch (request.EntityMetaData.EntityType.Code)
+            foreach (var item in resultItem.Data.Items)
             {
-                case "/Person":
-                    switch (resultItem.Data.label)
-                    {
-                        case "house":
-                            metadata.Properties[libpostalVocabulary.Person.House] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "category":
-                            metadata.Properties[libpostalVocabulary.Person.Category] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "near":
-                            metadata.Properties[libpostalVocabulary.Person.Near] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "house_number":
-                            metadata.Properties[libpostalVocabulary.Person.House_number] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "road":
-                            metadata.Properties[libpostalVocabulary.Person.Road] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "unit":
-                            metadata.Properties[libpostalVocabulary.Person.Unit] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "level":
-                            metadata.Properties[libpostalVocabulary.Person.Level] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "staircase":
-                            metadata.Properties[libpostalVocabulary.Person.Staircase] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "entrance":
-                            metadata.Properties[libpostalVocabulary.Person.Entrance] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "po_box":
-                            metadata.Properties[libpostalVocabulary.Person.Po_box] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "postcode":
-                            metadata.Properties[libpostalVocabulary.Person.Postcode] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "suburb":
-                            metadata.Properties[libpostalVocabulary.Person.Suburb] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city_district":
-                            metadata.Properties[libpostalVocabulary.Person.City_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city":
-                            metadata.Properties[libpostalVocabulary.Person.City] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "island":
-                            metadata.Properties[libpostalVocabulary.Person.Island] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state_district":
-                            metadata.Properties[libpostalVocabulary.Person.State_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state":
-                            metadata.Properties[libpostalVocabulary.Person.State] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country_region":
-                            metadata.Properties[libpostalVocabulary.Person.Country_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country":
-                            metadata.Properties[libpostalVocabulary.Person.Country] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "world_region":
-                            metadata.Properties[libpostalVocabulary.Person.World_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                    }
-                    break;
-                case "/Organization":
-                    switch (resultItem.Data.label)
-                    {
-                        case "house":
-                            metadata.Properties[libpostalVocabulary.Organization.House] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "category":
-                            metadata.Properties[libpostalVocabulary.Organization.Category] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "near":
-                            metadata.Properties[libpostalVocabulary.Organization.Near] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "house_number":
-                            metadata.Properties[libpostalVocabulary.Organization.House_number] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "road":
-                            metadata.Properties[libpostalVocabulary.Organization.Road] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "unit":
-                            metadata.Properties[libpostalVocabulary.Organization.Unit] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "level":
-                            metadata.Properties[libpostalVocabulary.Organization.Level] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "staircase":
-                            metadata.Properties[libpostalVocabulary.Organization.Staircase] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "entrance":
-                            metadata.Properties[libpostalVocabulary.Organization.Entrance] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "po_box":
-                            metadata.Properties[libpostalVocabulary.Organization.Po_box] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "postcode":
-                            metadata.Properties[libpostalVocabulary.Organization.Postcode] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "suburb":
-                            metadata.Properties[libpostalVocabulary.Organization.Suburb] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city_district":
-                            metadata.Properties[libpostalVocabulary.Organization.City_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city":
-                            metadata.Properties[libpostalVocabulary.Organization.City] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "island":
-                            metadata.Properties[libpostalVocabulary.Organization.Island] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state_district":
-                            metadata.Properties[libpostalVocabulary.Organization.State_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state":
-                            metadata.Properties[libpostalVocabulary.Organization.State] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country_region":
-                            metadata.Properties[libpostalVocabulary.Organization.Country_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country":
-                            metadata.Properties[libpostalVocabulary.Organization.Country] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "world_region":
-                            metadata.Properties[libpostalVocabulary.Organization.World_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                    }
-                    break;
-                case "/Infrastructure/User":
-                    switch (resultItem.Data.label)
-                    {
-                        case "house":
-                            metadata.Properties[libpostalVocabulary.User.House] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "category":
-                            metadata.Properties[libpostalVocabulary.User.Category] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "near":
-                            metadata.Properties[libpostalVocabulary.User.Near] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "house_number":
-                            metadata.Properties[libpostalVocabulary.User.House_number] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "road":
-                            metadata.Properties[libpostalVocabulary.User.Road] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "unit":
-                            metadata.Properties[libpostalVocabulary.User.Unit] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "level":
-                            metadata.Properties[libpostalVocabulary.User.Level] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "staircase":
-                            metadata.Properties[libpostalVocabulary.User.Staircase] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "entrance":
-                            metadata.Properties[libpostalVocabulary.User.Entrance] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "po_box":
-                            metadata.Properties[libpostalVocabulary.User.Po_box] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "postcode":
-                            metadata.Properties[libpostalVocabulary.User.Postcode] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "suburb":
-                            metadata.Properties[libpostalVocabulary.User.Suburb] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city_district":
-                            metadata.Properties[libpostalVocabulary.User.City_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city":
-                            metadata.Properties[libpostalVocabulary.User.City] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "island":
-                            metadata.Properties[libpostalVocabulary.User.Island] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state_district":
-                            metadata.Properties[libpostalVocabulary.User.State_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state":
-                            metadata.Properties[libpostalVocabulary.User.State] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country_region":
-                            metadata.Properties[libpostalVocabulary.User.Country_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country":
-                            metadata.Properties[libpostalVocabulary.User.Country] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "world_region":
-                            metadata.Properties[libpostalVocabulary.User.World_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                    }
-                    break;
-                case "/Location":
-                    switch (resultItem.Data.label)
-                    {
-                        case "house":
-                            metadata.Properties[libpostalVocabulary.Location.House] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "category":
-                            metadata.Properties[libpostalVocabulary.Location.Category] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "near":
-                            metadata.Properties[libpostalVocabulary.Location.Near] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "house_number":
-                            metadata.Properties[libpostalVocabulary.Location.House_number] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "road":
-                            metadata.Properties[libpostalVocabulary.Location.Road] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "unit":
-                            metadata.Properties[libpostalVocabulary.Location.Unit] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "level":
-                            metadata.Properties[libpostalVocabulary.Location.Level] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "staircase":
-                            metadata.Properties[libpostalVocabulary.Location.Staircase] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "entrance":
-                            metadata.Properties[libpostalVocabulary.Location.Entrance] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "po_box":
-                            metadata.Properties[libpostalVocabulary.Location.Po_box] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "postcode":
-                            metadata.Properties[libpostalVocabulary.Location.Postcode] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "suburb":
-                            metadata.Properties[libpostalVocabulary.Location.Suburb] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city_district":
-                            metadata.Properties[libpostalVocabulary.Location.City_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "city":
-                            metadata.Properties[libpostalVocabulary.Location.City] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "island":
-                            metadata.Properties[libpostalVocabulary.Location.Island] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state_district":
-                            metadata.Properties[libpostalVocabulary.Location.State_district] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "state":
-                            metadata.Properties[libpostalVocabulary.Location.State] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country_region":
-                            metadata.Properties[libpostalVocabulary.Location.Country_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "country":
-                            metadata.Properties[libpostalVocabulary.Location.Country] = resultItem.Data.value.ToTitleCase();
-                            break;
-                        case "world_region":
-                            metadata.Properties[libpostalVocabulary.Location.World_region] = resultItem.Data.value.ToTitleCase();
-                            break;
-                    }
-                    break;
+                switch (item.label)
+                {
+                    case "house":
+                        metadata.Properties[libpostalVocabulary.Location.House] = item.value.ToTitleCase();
+                        break;
+                    case "category":
+                        metadata.Properties[libpostalVocabulary.Location.Category] = item.value.ToTitleCase();
+                        break;
+                    case "near":
+                        metadata.Properties[libpostalVocabulary.Location.Near] = item.value.ToTitleCase();
+                        break;
+                    case "house_number":
+                        metadata.Properties[libpostalVocabulary.Location.House_number] = item.value.ToTitleCase();
+                        break;
+                    case "road":
+                        metadata.Properties[libpostalVocabulary.Location.Road] = item.value.ToTitleCase();
+                        break;
+                    case "unit":
+                        metadata.Properties[libpostalVocabulary.Location.Unit] = item.value.ToTitleCase();
+                        break;
+                    case "level":
+                        metadata.Properties[libpostalVocabulary.Location.Level] = item.value.ToTitleCase();
+                        break;
+                    case "staircase":
+                        metadata.Properties[libpostalVocabulary.Location.Staircase] = item.value.ToTitleCase();
+                        break;
+                    case "entrance":
+                        metadata.Properties[libpostalVocabulary.Location.Entrance] = item.value.ToTitleCase();
+                        break;
+                    case "po_box":
+                        metadata.Properties[libpostalVocabulary.Location.Po_box] = item.value.ToTitleCase();
+                        break;
+                    case "postcode":
+                        metadata.Properties[libpostalVocabulary.Location.Postcode] = item.value.ToTitleCase();
+                        break;
+                    case "suburb":
+                        metadata.Properties[libpostalVocabulary.Location.Suburb] = item.value.ToTitleCase();
+                        break;
+                    case "city_district":
+                        metadata.Properties[libpostalVocabulary.Location.City_district] = item.value.ToTitleCase();
+                        break;
+                    case "city":
+                        metadata.Properties[libpostalVocabulary.Location.City] = item.value.ToTitleCase();
+                        break;
+                    case "island":
+                        metadata.Properties[libpostalVocabulary.Location.Island] = item.value.ToTitleCase();
+                        break;
+                    case "state_district":
+                        metadata.Properties[libpostalVocabulary.Location.State_district] = item.value.ToTitleCase();
+                        break;
+                    case "state":
+                        metadata.Properties[libpostalVocabulary.Location.State] = item.value.ToTitleCase();
+                        break;
+                    case "country_region":
+                        metadata.Properties[libpostalVocabulary.Location.Country_region] = item.value.ToTitleCase();
+                        break;
+                    case "country":
+                        metadata.Properties[libpostalVocabulary.Location.Country] = item.value.ToTitleCase();
+                        break;
+                    case "world_region":
+                        metadata.Properties[libpostalVocabulary.Location.World_region] = item.value.ToTitleCase();
+                        break;
+                }
             }
 
             metadata.Codes.Add(code);
         }
+
+        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
+        {
+            return AcceptedEntityTypes;
+        }
+
+        public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return BuildQueries(context, request);
+        }
+
+        public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
+        {
+            return ExecuteSearch(context, query);
+        }
+
+        public IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return BuildClues(context, query, result, request);
+        }
+
+        public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return GetPrimaryEntityMetadata(context, result, request);
+        }
+
+        public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return GetPrimaryEntityPreviewImage(context, result, request);
+        }
+
+        public string Icon { get; } = Constants.Icon;
+        public string Domain { get; } = Constants.Domain;
+        public string About { get; } = Constants.About;
+
+        public AuthMethods AuthMethods { get; } = Constants.AuthMethods;
+        public IEnumerable<Control> Properties { get; } = Constants.Properties;
+        public Guide Guide { get; } = Constants.Guide;
+        public IntegrationType Type { get; } = Constants.IntegrationType;
     }
 }
