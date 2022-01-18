@@ -115,7 +115,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The results.</returns>
         public override IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query)
         {
-            var url = ConfigurationManager.AppSettings.GetValue<string>("ExternalSearch.libpostal.url", "");
+            var url = ConfigurationManagerEx.AppSettings.GetValue<string>("ExternalSearch.libpostal.url", "");
             if (url.IsNullOrEmpty())
             {
                 throw new Exception("Bad configuration");
