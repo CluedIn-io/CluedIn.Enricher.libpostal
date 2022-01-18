@@ -3,9 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B2A52533-7FBF-41FE-A0AF-874FC54300B2}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Build.props = src\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7E2E897B-E664-4ECC-8AD8-814AAEAD8639}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,9 +43,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{17EE3C8D-BAE
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.libpostal", "src\ExternalSearch.Providers.libpostal.csproj", "{E5832F12-6BB8-4ACA-AB23-F82888FF3971}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.libpostal.Integration.Tests", "test\integration\Integration.Tests\ExternalSearch.libpostal.Integration.Tests.csproj", "{8CBDF6EB-A861-466E-932B-04CA5917923C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.Libpostal", "src\ExternalSearch.Providers.Libpostal\ExternalSearch.Providers.Libpostal.csproj", "{0C70365E-DB91-484F-868B-C09810070625}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Provider.ExternalSearch.Libpostal", "src\ExternalSearch.Providers.Libpostal.Provider\Provider.ExternalSearch.Libpostal.csproj", "{C5343225-5231-491D-82B5-BB638DE13225}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,14 +55,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E5832F12-6BB8-4ACA-AB23-F82888FF3971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5832F12-6BB8-4ACA-AB23-F82888FF3971}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5832F12-6BB8-4ACA-AB23-F82888FF3971}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5832F12-6BB8-4ACA-AB23-F82888FF3971}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CBDF6EB-A861-466E-932B-04CA5917923C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C70365E-DB91-484F-868B-C09810070625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C70365E-DB91-484F-868B-C09810070625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C70365E-DB91-484F-868B-C09810070625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C70365E-DB91-484F-868B-C09810070625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5343225-5231-491D-82B5-BB638DE13225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5343225-5231-491D-82B5-BB638DE13225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5343225-5231-491D-82B5-BB638DE13225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5343225-5231-491D-82B5-BB638DE13225}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +80,8 @@ Global
 		{2C3AECCF-DCB5-4ED7-8B7B-8F373EDE3A5E} = {9BD54E81-D9C8-4419-82B8-8EE6CC7E2647}
 		{17EE3C8D-BAE4-481A-B9CC-1BE878E86124} = {9BD54E81-D9C8-4419-82B8-8EE6CC7E2647}
 		{8CBDF6EB-A861-466E-932B-04CA5917923C} = {DBD1964B-DBD9-4C70-96CA-391C34B3D75F}
+		{0C70365E-DB91-484F-868B-C09810070625} = {B2A52533-7FBF-41FE-A0AF-874FC54300B2}
+		{C5343225-5231-491D-82B5-BB638DE13225} = {B2A52533-7FBF-41FE-A0AF-874FC54300B2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A61CB42-80C5-4A83-AC3E-DA41FC875525}

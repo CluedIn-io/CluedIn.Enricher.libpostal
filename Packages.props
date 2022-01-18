@@ -1,8 +1,10 @@
 <Project>
-  <PropertyGroup Label="Dependency Versions">
-    <_AutoFixture>4.11.0</_AutoFixture>
-    <_CluedIn>3.3.0-ama.*</_CluedIn>
-  </PropertyGroup>
+    <PropertyGroup Label="Dependency Versions">
+        <_ComponentHost>2.0.0</_ComponentHost>
+        <_AutoFixture>4.11.0</_AutoFixture>
+        <_CluedIn>3.3.0-ama.*</_CluedIn>
+    </PropertyGroup>
+
   <ItemGroup>
     <!--
         Specified versions for dependencies in test projects
@@ -28,6 +30,7 @@
 
         MUST SPECIFY IN CSPROJ AS <PackageReference Name="<depName>" />
     -->
+    <PackageReference Update="ComponentHost" Version="$(_ComponentHost)" />
     <PackageReference Update="CluedIn.Core" Version="$(_CluedIn)" />
     <PackageReference Update="CluedIn.ExternalSearch" Version="$(_CluedIn)" />
   </ItemGroup>

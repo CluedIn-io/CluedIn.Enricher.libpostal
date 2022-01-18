@@ -3,9 +3,10 @@
     <None Remove="Resources\cluedin.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\knowledgegraph.jpg" />
+    <EmbeddedResource Include="Resources\cluedin.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CluedIn.Core" />
     <PackageReference Include="CluedIn.ExternalSearch" />
   </ItemGroup>
 </Project>
