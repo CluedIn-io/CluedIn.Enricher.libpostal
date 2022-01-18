@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using CluedIn.Core;
 using CluedIn.Core.Data;
 using CluedIn.Core.Data.Parts;
 using CluedIn.Core.Configuration;
-using CluedIn.ExternalSearch.Providers.libpostal.Models;
-using CluedIn.ExternalSearch.Providers.libpostal.Vocabularies;
 using Newtonsoft.Json;
 using RestSharp;
 using Castle.Core.Internal;
@@ -16,13 +13,14 @@ using CluedIn.Core.Data.Relational;
 using CluedIn.Core.ExternalSearch;
 using CluedIn.Core.Providers;
 using EntityType = CluedIn.Core.Data.EntityType;
-using Constants = CluedIn.ExternalSearch.Providers.Libpostal.Constants;
+using CluedIn.ExternalSearch.Providers.Libpostal.Vocabularies;
+using CluedIn.ExternalSearch.Providers.Libpostal.Models;
 
-namespace CluedIn.ExternalSearch.Providers.libpostal
+namespace CluedIn.ExternalSearch.Providers.Libpostal
 {
-    /// <summary>The libpostal graph external search provider.</summary>
-    /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-    public class libpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
+    /// <summary>The Libpostal graph external search provider.</summary>
+    /// <seealso cref="ExternalSearchProviderBase" />
+    public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
         private static readonly EntityType[] AcceptedEntityTypes = new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, EntityType.Location, EntityType.Location.Address, "/LegalEntity" };
 
@@ -30,7 +28,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
          * CONSTRUCTORS
          **********************************************************************************************************/
 
-        public libpostalExternalSearchProvider()
+        public LibpostalExternalSearchProvider()
             : base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
         {
         }
@@ -49,7 +47,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             if (!Accepts(request.EntityMetaData.EntityType))
                 yield break;
 
-            //var existingResults = request.GetQueryResults<libpostalResponse>(this).ToList();
+            //var existingResults = request.GetQueryResults<LibpostalResponse>(this).ToList();
 
             //bool filter(string value)
             //{
@@ -115,7 +113,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The results.</returns>
         public override IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query)
         {
-            var url = ConfigurationManagerEx.AppSettings.GetValue<string>("ExternalSearch.libpostal.url", "");
+            var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
             if (url.IsNullOrEmpty())
             {
                 throw new Exception("Bad configuration");
@@ -137,18 +135,18 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
 
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteTaskAsync<libpostalResponse>(request).Result;
+            var response = client.ExecuteTaskAsync<LibpostalResponse>(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Content != null)
                 {
-                    var data = new libpostalResponse();
+                    var data = new LibpostalResponse();
                     foreach (var item in JsonConvert.DeserializeObject<List<Items>>(response.Content))
                     {
                         data.Items.Add(item);
                     }
-                    yield return new ExternalSearchQueryResult<libpostalResponse>(query, data);
+                    yield return new ExternalSearchQueryResult<LibpostalResponse>(query, data);
                 }
             }
             else if (response.StatusCode == HttpStatusCode.NoContent || response.StatusCode == HttpStatusCode.NotFound)
@@ -168,7 +166,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The clues.</returns>
         public override IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request)
         {
-            if (result is IExternalSearchQueryResult<libpostalResponse> libpostalResult)
+            if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
                 var code = GetOriginEntityCode(libpostalResult, request);
                 var clue = new Clue(code, context.Organization);
@@ -186,7 +184,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <returns>The primary entity metadata.</returns>
         public override IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request)
         {
-            if (result is IExternalSearchQueryResult<libpostalResponse> libpostalResult)
+            if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
                 return CreateMetadata(libpostalResult, request);
             }
@@ -206,7 +204,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <summary>Creates the metadata.</summary>
         /// <param name="resultItem">The result item.</param>
         /// <returns>The metadata.</returns>
-        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
+        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
             var metadata = new EntityMetadataPart();
 
@@ -218,7 +216,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <summary>Gets the origin entity code.</summary>
         /// <param name="resultItem">The result item.</param>
         /// <returns>The origin entity code.</returns>
-        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
+        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
             return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Id.ToString());
         }
@@ -234,7 +232,7 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
         /// <summary>Populates the metadata.</summary>
         /// <param name="metadata">The metadata.</param>
         /// <param name="resultItem">The result item.</param>
-        private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<libpostalResponse> resultItem, IExternalSearchRequest request)
+        private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
             var code = GetOriginEntityCode(resultItem, request);
 
@@ -249,64 +247,64 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
                 switch (item.label)
                 {
                     case "house":
-                        metadata.Properties[libpostalVocabulary.Location.House] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.House] = item.value.ToTitleCase();
                         break;
                     case "category":
-                        metadata.Properties[libpostalVocabulary.Location.Category] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Category] = item.value.ToTitleCase();
                         break;
                     case "near":
-                        metadata.Properties[libpostalVocabulary.Location.Near] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Near] = item.value.ToTitleCase();
                         break;
                     case "house_number":
-                        metadata.Properties[libpostalVocabulary.Location.House_number] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.House_number] = item.value.ToTitleCase();
                         break;
                     case "road":
-                        metadata.Properties[libpostalVocabulary.Location.Road] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Road] = item.value.ToTitleCase();
                         break;
                     case "unit":
-                        metadata.Properties[libpostalVocabulary.Location.Unit] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Unit] = item.value.ToTitleCase();
                         break;
                     case "level":
-                        metadata.Properties[libpostalVocabulary.Location.Level] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Level] = item.value.ToTitleCase();
                         break;
                     case "staircase":
-                        metadata.Properties[libpostalVocabulary.Location.Staircase] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Staircase] = item.value.ToTitleCase();
                         break;
                     case "entrance":
-                        metadata.Properties[libpostalVocabulary.Location.Entrance] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Entrance] = item.value.ToTitleCase();
                         break;
                     case "po_box":
-                        metadata.Properties[libpostalVocabulary.Location.Po_box] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Po_box] = item.value.ToTitleCase();
                         break;
                     case "postcode":
-                        metadata.Properties[libpostalVocabulary.Location.Postcode] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Postcode] = item.value.ToTitleCase();
                         break;
                     case "suburb":
-                        metadata.Properties[libpostalVocabulary.Location.Suburb] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Suburb] = item.value.ToTitleCase();
                         break;
                     case "city_district":
-                        metadata.Properties[libpostalVocabulary.Location.City_district] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.City_district] = item.value.ToTitleCase();
                         break;
                     case "city":
-                        metadata.Properties[libpostalVocabulary.Location.City] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.City] = item.value.ToTitleCase();
                         break;
                     case "island":
-                        metadata.Properties[libpostalVocabulary.Location.Island] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Island] = item.value.ToTitleCase();
                         break;
                     case "state_district":
-                        metadata.Properties[libpostalVocabulary.Location.State_district] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.State_district] = item.value.ToTitleCase();
                         break;
                     case "state":
-                        metadata.Properties[libpostalVocabulary.Location.State] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.State] = item.value.ToTitleCase();
                         break;
                     case "country_region":
-                        metadata.Properties[libpostalVocabulary.Location.Country_region] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Country_region] = item.value.ToTitleCase();
                         break;
                     case "country":
-                        metadata.Properties[libpostalVocabulary.Location.Country] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.Country] = item.value.ToTitleCase();
                         break;
                     case "world_region":
-                        metadata.Properties[libpostalVocabulary.Location.World_region] = item.value.ToTitleCase();
+                        metadata.Properties[LibpostalVocabulary.Location.World_region] = item.value.ToTitleCase();
                         break;
                 }
             }

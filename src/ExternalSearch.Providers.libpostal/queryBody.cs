@@ -1,4 +1,4 @@
-namespace CluedIn.ExternalSearch.Providers.libpostal
+namespace CluedIn.ExternalSearch.Providers.Libpostal
 {
     public class queryBody
     {
