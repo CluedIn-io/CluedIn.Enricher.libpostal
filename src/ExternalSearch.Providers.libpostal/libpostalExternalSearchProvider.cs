@@ -122,7 +122,6 @@ namespace CluedIn.ExternalSearch.Providers.libpostal
             }
 
             var client = new RestClient(url);
-            //var client = new RestClient("http://localhost:8080/");
             var request = new RestRequest("parser", Method.POST);
             string address = null;
             request.AddHeader("Content-type", "application/json");
