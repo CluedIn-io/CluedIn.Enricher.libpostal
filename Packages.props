@@ -4,7 +4,6 @@
         <_AutoFixture>4.11.0</_AutoFixture>
         <_CluedIn>3.3.0-ama.*</_CluedIn>
     </PropertyGroup>
-
   <ItemGroup>
     <!--
         Specified versions for dependencies in test projects
