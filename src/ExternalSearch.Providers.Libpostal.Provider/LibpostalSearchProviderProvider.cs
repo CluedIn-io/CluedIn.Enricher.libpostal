@@ -111,6 +111,7 @@ namespace CluedIn.Provider.Libpostal
             throw new NotImplementedException();
         }
 
+        public override bool ScheduleCrawlJobs => false;
         public string Icon { get; } = Constants.Icon;
         public string Domain { get; } = Constants.Domain;
         public string About { get; } = Constants.About;
