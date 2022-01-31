@@ -7,7 +7,7 @@ using CluedIn.Core.Messages.Processing;
 using CluedIn.ExternalSearch;
 using CluedIn.ExternalSearch.Providers.libpostal;
 using CluedIn.ExternalSearch.Providers.libpostal.Models;
-using CluedIn.Testing.Base.ExternalSearch;
+//using CluedIn.Testing.Base.ExternalSearch;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace CluedIn.Tests.Integration.ExternalSearch
 {
+    /*
     public class libpostalTests : BaseExternalSearchTest<libpostalExternalSearchProvider>
     {
         private readonly ITestOutputHelper outputHelper;
@@ -44,4 +45,5 @@ namespace CluedIn.Tests.Integration.ExternalSearch
         }
 
     }
+    */
 }
