@@ -1,4 +1,4 @@
-# CluedIn.Enricher.libpostal
+# CluedIn.Enricher.Libpostal
 
 CluedIn External Search for LibPostal Crawler.
 

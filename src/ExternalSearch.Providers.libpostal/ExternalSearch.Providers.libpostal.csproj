@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <None Remove="Resources\cluedin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cluedin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CluedIn.Core" />
+    <PackageReference Include="CluedIn.ExternalSearch" />
+  </ItemGroup>
+</Project>
