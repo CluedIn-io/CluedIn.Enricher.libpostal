@@ -249,7 +249,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         /// <returns>The origin entity code.</returns>
         private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Id.ToString());
+            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), request.EntityMetaData.OriginEntityCode.Value);
         }
 
         /// <summary>Gets the code origin.</summary>
@@ -273,6 +273,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
             metadata.OriginEntityCode = code;
+            metadata.Codes.Add(code);
             foreach (var item in resultItem.Data.Items)
             {
                 switch (item.label)
