@@ -201,7 +201,6 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             {
                 var code = GetOriginEntityCode(libpostalResult, request);
                 var clue = new Clue(code, context.Organization);
-                clue.Data.EntityData.Codes.Add(request.EntityMetaData.Codes.First());
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
@@ -274,6 +273,8 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             //metadata.Description = resultItem.Data.description;
             metadata.OriginEntityCode = code;
             metadata.Codes.Add(code);
+            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
+
             foreach (var item in resultItem.Data.Items)
             {
                 switch (item.label)
