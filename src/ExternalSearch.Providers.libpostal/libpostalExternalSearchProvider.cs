@@ -23,14 +23,14 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
     /// <seealso cref="ExternalSearchProviderBase" />
     public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
-        private static readonly EntityType[] AcceptedEntityTypes = new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, EntityType.Location, EntityType.Location.Address, "/LegalEntity" };
+        private static readonly EntityType[] _acceptedEntityTypes = new EntityType[] { };
 
         /**********************************************************************************************************
          * CONSTRUCTORS
          **********************************************************************************************************/
 
         public LibpostalExternalSearchProvider()
-            : base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
+            : base(Constants.ProviderId, entityTypes: _acceptedEntityTypes)
         {
         }
 
@@ -347,7 +347,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
         {
-            return AcceptedEntityTypes;
+            return _acceptedEntityTypes;
         }
 
         public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
