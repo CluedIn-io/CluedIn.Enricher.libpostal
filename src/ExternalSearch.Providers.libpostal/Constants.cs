@@ -12,7 +12,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         public static readonly Guid ProviderId = Guid.Parse("aba4e4cf-3c48-4828-9fdf-990b22e1a29c");
 
         public static string About { get; set; } = "Libpostal allows for parsing/normalizing street addresses around the world using statistical NLP and open data";
-        public static string Icon { get; set; } = "Resources.cluedin.png";
+        public static string Icon { get; set; } = "Resources.logo.svg";
         public static string Domain { get; set; } = "N/A";
 
         public static AuthMethods AuthMethods { get; set; } = new AuthMethods
