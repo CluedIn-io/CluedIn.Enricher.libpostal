@@ -37,14 +37,6 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal.Vocabularies
                 World_region = group.Add(new VocabularyKey("World_region", VocabularyKeyDataType.Text, VocabularyKeyVisibility.Visible));
             });
 
-            AddMapping(Country, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressCountryCode);
-            AddMapping(City, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressCity);
-            AddMapping(State, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressState);
-            AddMapping(Road, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressNameStreet);
-            AddMapping(Po_box, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressPostOfficeBox);
-            AddMapping(Level, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressFloorCode);
-            AddMapping(House_number, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressStreetNumber);
-            AddMapping(Postcode, Core.Data.Vocabularies.Vocabularies.CluedInLocation.AddressZipCode);
 
         }
 

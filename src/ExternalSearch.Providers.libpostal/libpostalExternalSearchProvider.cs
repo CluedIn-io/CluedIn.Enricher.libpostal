@@ -15,6 +15,7 @@ using CluedIn.Core.Providers;
 using EntityType = CluedIn.Core.Data.EntityType;
 using CluedIn.ExternalSearch.Providers.Libpostal.Vocabularies;
 using CluedIn.ExternalSearch.Providers.Libpostal.Models;
+using CluedIn.Core.Data.Vocabularies;
 
 namespace CluedIn.ExternalSearch.Providers.Libpostal
 {
@@ -22,14 +23,14 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
     /// <seealso cref="ExternalSearchProviderBase" />
     public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
-        private static readonly EntityType[] AcceptedEntityTypes = new EntityType[] { EntityType.Person, EntityType.Organization, EntityType.Infrastructure.User, EntityType.Location, EntityType.Location.Address, "/LegalEntity" };
+        private static readonly EntityType[] _acceptedEntityTypes = new EntityType[] { };
 
         /**********************************************************************************************************
          * CONSTRUCTORS
          **********************************************************************************************************/
 
         public LibpostalExternalSearchProvider()
-            : base(Constants.ProviderId, entityTypes: AcceptedEntityTypes)
+            : base(Constants.ProviderId, entityTypes: _acceptedEntityTypes)
         {
         }
 
@@ -44,7 +45,21 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         /// <returns>The search queries.</returns>
         public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request)
         {
-            if (!Accepts(request.EntityMetaData.EntityType))
+            foreach (var externalSearchQuery in InternalBuildQueries(context, request))
+            {
+                yield return externalSearchQuery;
+            }
+        }
+        private IEnumerable<IExternalSearchQuery> InternalBuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config = null)
+        {
+            if (config.TryGetValue(Constants.KeyName.AcceptedEntityType, out var customType) && !string.IsNullOrWhiteSpace(customType?.ToString()))
+            {
+                if (!request.EntityMetaData.EntityType.Is(customType.ToString()))
+                {
+                    yield break;
+                }
+            }
+            else if (!Accepts(request.EntityMetaData.EntityType))
                 yield break;
 
             //var existingResults = request.GetQueryResults<LibpostalResponse>(this).ToList();
@@ -56,10 +71,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
             var entityType = request.EntityMetaData.EntityType;
 
-            var personAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress, new HashSet<string>());
-            var organizationAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address, new HashSet<string>());
-            var userAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress, new HashSet<string>());
-            var locationAddress = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInLocation.Address, new HashSet<string>());
+            var personAddress = GetValue(request, config, Constants.KeyName.PersonAddress, Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress);
+            var organizationAddress = GetValue(request, config, Constants.KeyName.OrganizationAddress, Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address);
+            var userAddress = GetValue(request, config, Constants.KeyName.UserAddress, Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress);
+            var locationAddress = GetValue(request, config, Constants.KeyName.LocationAddress, Core.Data.Vocabularies.Vocabularies.CluedInLocation.Address);
+
 
             if (personAddress != null && personAddress.Count > 0)
             {
@@ -105,6 +121,21 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
             }
+        }
+
+        private static HashSet<string> GetValue(IExternalSearchRequest request, IDictionary<string, object> config, string keyName, VocabularyKey defaultKey)
+        {
+            HashSet<string> value;
+            if (config.TryGetValue(keyName, out var customVocabKey) && !string.IsNullOrWhiteSpace(customVocabKey?.ToString()))
+            {
+                value = request.QueryParameters.GetValue<string, HashSet<string>>(customVocabKey.ToString(), new HashSet<string>());
+            }
+            else
+            {
+                value = request.QueryParameters.GetValue(defaultKey, new HashSet<string>());
+            }
+
+            return value;
         }
 
         /// <summary>Executes the search.</summary>
@@ -170,7 +201,6 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             {
                 var code = GetOriginEntityCode(libpostalResult, request);
                 var clue = new Clue(code, context.Organization);
-                clue.Data.EntityData.Codes.Add(request.EntityMetaData.Codes.First());
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
@@ -218,7 +248,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         /// <returns>The origin entity code.</returns>
         private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Id.ToString());
+            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), request.EntityMetaData.OriginEntityCode.Value);
         }
 
         /// <summary>Gets the code origin.</summary>
@@ -242,6 +272,9 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
             metadata.OriginEntityCode = code;
+            metadata.Codes.Add(code);
+            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
+
             foreach (var item in resultItem.Data.Items)
             {
                 switch (item.label)
@@ -314,12 +347,12 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
         {
-            return AcceptedEntityTypes;
+            return _acceptedEntityTypes;
         }
 
         public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
-            return BuildQueries(context, request);
+            return InternalBuildQueries(context, request, config);
         }
 
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
