@@ -23,21 +23,48 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
     /// <seealso cref="ExternalSearchProviderBase" />
     public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
-        private static readonly EntityType[] _acceptedEntityTypes = new EntityType[] { };
+        /**********************************************************************************************************
+         * FIELDS
+         **********************************************************************************************************/
+
+        private static readonly EntityType[] DefaultAcceptedEntityTypes = { };
 
         /**********************************************************************************************************
          * CONSTRUCTORS
          **********************************************************************************************************/
 
         public LibpostalExternalSearchProvider()
-            : base(Constants.ProviderId, entityTypes: _acceptedEntityTypes)
+            : base(Constants.ProviderId, entityTypes: DefaultAcceptedEntityTypes)
         {
         }
-
 
         /**********************************************************************************************************
          * METHODS
          **********************************************************************************************************/
+
+        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider) => this.Accepts(config);
+
+        private IEnumerable<EntityType> Accepts(IDictionary<string, object> config)
+            => Accepts(new LibpostalExternalSearchJobData(config));
+
+        private IEnumerable<EntityType> Accepts(LibpostalExternalSearchJobData config)
+        {
+            if (!string.IsNullOrWhiteSpace(config.AcceptedEntityType))
+            {
+                // If configured, only accept the configured entity types
+                return new EntityType[] { config.AcceptedEntityType };
+            }
+
+            // Fallback to default accepted entity types
+            return DefaultAcceptedEntityTypes;
+        }
+
+        private bool Accepts(LibpostalExternalSearchJobData config, EntityType entityTypeToEvaluate)
+        {
+            var configurableAcceptedEntityTypes = this.Accepts(config).ToArray();
+
+            return configurableAcceptedEntityTypes.Any(entityTypeToEvaluate.Is);
+        }
 
         /// <summary>Builds the queries.</summary>
         /// <param name="context">The context.</param>
@@ -50,16 +77,9 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 yield return externalSearchQuery;
             }
         }
-        private IEnumerable<IExternalSearchQuery> InternalBuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config = null)
+        private IEnumerable<IExternalSearchQuery> InternalBuildQueries(ExecutionContext context, IExternalSearchRequest request, LibpostalExternalSearchJobData config = null)
         {
-            if (config.TryGetValue(Constants.KeyName.AcceptedEntityType, out var customType) && !string.IsNullOrWhiteSpace(customType?.ToString()))
-            {
-                if (!request.EntityMetaData.EntityType.Is(customType.ToString()))
-                {
-                    yield break;
-                }
-            }
-            else if (!Accepts(request.EntityMetaData.EntityType))
+            if (!this.Accepts(config, request.EntityMetaData.EntityType))
                 yield break;
 
             //var existingResults = request.GetQueryResults<LibpostalResponse>(this).ToList();
@@ -71,10 +91,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
             var entityType = request.EntityMetaData.EntityType;
 
-            var personAddress = GetValue(request, config, Constants.KeyName.PersonAddress, Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress);
-            var organizationAddress = GetValue(request, config, Constants.KeyName.OrganizationAddress, Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address);
-            var userAddress = GetValue(request, config, Constants.KeyName.UserAddress, Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress);
-            var locationAddress = GetValue(request, config, Constants.KeyName.LocationAddress, Core.Data.Vocabularies.Vocabularies.CluedInLocation.Address);
+            var configMap = config.ToDictionary();
+            var personAddress = GetValue(request, configMap, Constants.KeyName.PersonAddress, Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress);
+            var organizationAddress = GetValue(request, configMap, Constants.KeyName.OrganizationAddress, Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address);
+            var userAddress = GetValue(request, configMap, Constants.KeyName.UserAddress, Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress);
+            var locationAddress = GetValue(request, configMap, Constants.KeyName.LocationAddress, Core.Data.Vocabularies.Vocabularies.CluedInLocation.Address);
 
 
             if (personAddress != null && personAddress.Count > 0)
@@ -345,14 +366,9 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             metadata.Codes.Add(code);
         }
 
-        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
-        {
-            return _acceptedEntityTypes;
-        }
-
         public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
-            return InternalBuildQueries(context, request, config);
+            return InternalBuildQueries(context, request, new LibpostalExternalSearchJobData(config));
         }
 
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
@@ -374,6 +390,9 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         {
             return GetPrimaryEntityPreviewImage(context, result, request);
         }
+
+        // Since this is a configurable external search provider, theses methods should never be called
+        public override bool Accepts(EntityType entityType) => throw new NotSupportedException();
 
         public string Icon { get; } = Constants.Icon;
         public string Domain { get; } = Constants.Domain;
