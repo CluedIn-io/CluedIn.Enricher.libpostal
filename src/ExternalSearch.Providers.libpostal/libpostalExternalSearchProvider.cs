@@ -202,8 +202,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         {
             if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
-                var code = GetOriginEntityCode(libpostalResult, request);
-                var clue = new Clue(code, context.Organization);
+                var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
@@ -239,28 +238,14 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             return metadata;
         }
 
-        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
-        {
-            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), request.EntityMetaData.OriginEntityCode.Value);
-        }
-
-        private CodeOrigin GetCodeOrigin()
-        {
-            return CodeOrigin.CluedIn.CreateSpecific("libpostal");
-        }
-
         private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            var code = GetOriginEntityCode(resultItem, request);
-
             metadata.EntityType = request.EntityMetaData.EntityType;
 
             //Name is required, without it the changes are ignored and not added to the entity.
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
-            metadata.OriginEntityCode = code;
-            metadata.Codes.Add(code);
-            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
+            metadata.OriginEntityCode = request.EntityMetaData.OriginEntityCode;
 
             foreach (var item in resultItem.Data.Items)
             {
@@ -328,8 +313,6 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                         break;
                 }
             }
-
-            metadata.Codes.Add(code);
         }
 
         // Since this is a configurable external search provider, theses methods should never be called
