@@ -107,7 +107,10 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             //}
         };
 
-        public static Guide Guide { get; set; } = null;
+        public static Guide Guide { get; set; } = new Guide
+        {
+            Instructions = Instruction
+        };
         public static IntegrationType IntegrationType { get; set; } = IntegrationType.Enrichment;
     }
 }
