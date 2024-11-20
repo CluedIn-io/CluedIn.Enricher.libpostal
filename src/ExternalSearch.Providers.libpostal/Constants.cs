@@ -25,42 +25,47 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         public static AuthMethods AuthMethods { get; set; } = new AuthMethods
         {
-            token = new List<Control>()
+            Token = new List<Control>()
             {
                 new Control()
                 {
-                    displayName = "Accepted Entity Type",
-                    type = "input",
-                    isRequired = true,
-                    name = KeyName.AcceptedEntityType
+                    DisplayName = "Accepted Entity Type",
+                    Type = "input",
+                    IsRequired = true,
+                    Name = KeyName.AcceptedEntityType,
+                    Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
                 },
                 new Control()
                 {
-                    displayName = "Person Address vocab key",
-                    type = "input",
-                    isRequired = false,
-                    name = KeyName.PersonAddress
+                    DisplayName = "Person Address Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = KeyName.PersonAddress,
+                    Help = "The vocabulary key that contains the addresses of persons you want to enrich (e.g., person.home.address.city)."
                 },
                 new Control()
                 {
-                    displayName = "Organization Address vocab key",
-                    type = "input",
-                    isRequired = false,
-                    name = KeyName.OrganizationAddress
+                    DisplayName = "Organization Address Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = KeyName.OrganizationAddress,
+                    Help = "The vocabulary key that contains the addresses of companies you want to enrich (e.g., organization.address)."
                 },
                 new Control()
                 {
-                    displayName = "User Address vocab key",
-                    type = "input",
-                    isRequired = false,
-                    name = KeyName.UserAddress
+                    DisplayName = "User Address Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = KeyName.UserAddress,
+                    Help = "The vocabulary key that contains the addresses of users you want to enrich (e.g., user.home.address)."
                 },
                 new Control()
                 {
-                    displayName = "Location Address vocab key",
-                    type = "input",
-                    isRequired = false,
-                    name = KeyName.LocationAddress
+                    DisplayName = "Location Address Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = KeyName.LocationAddress,
+                    Help = "The vocabulary key that contains the addresses of locations you want to enrich (e.g., location.fullAddress)."
                 },
             }
         };
