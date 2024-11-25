@@ -55,7 +55,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 new Control()
                 {
                     DisplayName = "Accepted Entity Type",
-                    Type = "input",
+                    Type = "entityTypeSelector",
                     IsRequired = true,
                     Name = KeyName.AcceptedEntityType,
                     Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
@@ -63,7 +63,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 new Control()
                 {
                     DisplayName = "Person Address Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
                     Name = KeyName.PersonAddress,
                     Help = "The vocabulary key that contains the addresses of persons you want to enrich (e.g., person.home.address.city)."
@@ -71,7 +71,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 new Control()
                 {
                     DisplayName = "Organization Address Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
                     Name = KeyName.OrganizationAddress,
                     Help = "The vocabulary key that contains the addresses of companies you want to enrich (e.g., organization.address)."
@@ -79,7 +79,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 new Control()
                 {
                     DisplayName = "User Address Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
                     Name = KeyName.UserAddress,
                     Help = "The vocabulary key that contains the addresses of users you want to enrich (e.g., user.home.address)."
@@ -87,7 +87,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                 new Control()
                 {
                     DisplayName = "Location Address Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
                     Name = KeyName.LocationAddress,
                     Help = "The vocabulary key that contains the addresses of locations you want to enrich (e.g., location.fullAddress)."
