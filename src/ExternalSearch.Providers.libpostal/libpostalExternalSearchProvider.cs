@@ -23,7 +23,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 {
     /// <summary>The Libpostal graph external search provider.</summary>
     /// <seealso cref="ExternalSearchProviderBase" />
-    public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider, IExtendedEnricherMetadata2
+    public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider, IExternalSearchProviderWithVerifyConnection
     {
         /**********************************************************************************************************
          * FIELDS
