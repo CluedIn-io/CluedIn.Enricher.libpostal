@@ -204,7 +204,8 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         {
             if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
-                var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
+                var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+                var clue = new Clue(code, context.Organization);
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
@@ -290,12 +291,15 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{request.Queries.FirstOrDefault()?.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+
             metadata.EntityType = request.EntityMetaData.EntityType;
 
             //Name is required, without it the changes are ignored and not added to the entity.
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
-            metadata.OriginEntityCode = request.EntityMetaData.OriginEntityCode;
+            metadata.OriginEntityCode = code;
+            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
 
             foreach (var item in resultItem.Data.Items)
             {
