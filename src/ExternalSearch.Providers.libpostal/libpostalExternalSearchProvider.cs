@@ -16,12 +16,14 @@ using EntityType = CluedIn.Core.Data.EntityType;
 using CluedIn.ExternalSearch.Providers.Libpostal.Vocabularies;
 using CluedIn.ExternalSearch.Providers.Libpostal.Models;
 using CluedIn.Core.Data.Vocabularies;
+using CluedIn.Core.Connectors;
+using System.Text.RegularExpressions;
 
 namespace CluedIn.ExternalSearch.Providers.Libpostal
 {
     /// <summary>The Libpostal graph external search provider.</summary>
     /// <seealso cref="ExternalSearchProviderBase" />
-    public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
+    public class LibpostalExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider, IExternalSearchProviderWithVerifyConnection
     {
         /**********************************************************************************************************
          * FIELDS
@@ -202,7 +204,8 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         {
             if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
-                var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
+                var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+                var clue = new Clue(code, context.Organization);
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
             }
@@ -229,6 +232,54 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             return null;
         }
 
+        public ConnectionVerificationResult VerifyConnection(ExecutionContext context, IReadOnlyDictionary<string, object> config)
+        {
+            var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
+            if (url.IsNullOrEmpty())
+            {
+                return new ConnectionVerificationResult(false, "Bad configuration: Invalid url");
+            }
+
+            var client = new RestClient(url);
+            var request = new RestRequest("parser", Method.POST);
+            var address = "Belgrave House, 76 Buckingham Palace Road";
+            request.AddHeader("Content-type", "application/json");
+            request.AddJsonBody(new queryBody() { query = address });
+
+            var response = client.ExecuteAsync<LibpostalResponse>(request).Result;
+
+            if (response.StatusCode == HttpStatusCode.OK && response.Content != null)
+            {
+                return new ConnectionVerificationResult(true, string.Empty);
+            }
+
+            return ConstructVerifyConnectionResponse(response);
+        }
+
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+        {
+            var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
+            if (response.ErrorException != null)
+            {
+                return new ConnectionVerificationResult(false, $"{errorMessageBase} {(!string.IsNullOrWhiteSpace(response.ErrorException.Message) ? response.ErrorException.Message : "This could be due to breaking changes in the external system")}.");
+            }
+
+            if (response.StatusCode is HttpStatusCode.Unauthorized)
+            {
+                return new ConnectionVerificationResult(false, $"{errorMessageBase} This could be due to invalid API key.");
+            }
+
+            var regex = new Regex(@"\<(html|head|body|div|span|img|p\>|a href)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            var isHtml = regex.IsMatch(response.Content);
+
+            var errorMessage = response.IsSuccessful ? string.Empty
+                : string.IsNullOrWhiteSpace(response.Content) || isHtml
+                    ? $"{errorMessageBase} This could be due to breaking changes in the external system."
+                    : $"{errorMessageBase} {response.Content}.";
+
+            return new ConnectionVerificationResult(response.IsSuccessful, errorMessage);
+        }
+
         private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
             var metadata = new EntityMetadataPart();
@@ -240,12 +291,15 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{request.Queries.FirstOrDefault()?.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+
             metadata.EntityType = request.EntityMetaData.EntityType;
 
             //Name is required, without it the changes are ignored and not added to the entity.
             metadata.Name = request.EntityMetaData.Name;
             //metadata.Description = resultItem.Data.description;
-            metadata.OriginEntityCode = request.EntityMetaData.OriginEntityCode;
+            metadata.OriginEntityCode = code;
+            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
 
             foreach (var item in resultItem.Data.Items)
             {
