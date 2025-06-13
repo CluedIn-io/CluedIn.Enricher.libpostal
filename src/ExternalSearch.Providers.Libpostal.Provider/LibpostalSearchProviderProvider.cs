@@ -119,5 +119,11 @@ namespace CluedIn.Provider.Libpostal
         public IEnumerable<Control> Properties { get; } = Constants.Properties;
         public Guide Guide { get; } = Constants.Guide;
         public new IntegrationType Type { get; } = Constants.IntegrationType;
+        public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() {
+            { "Person Address", [Constants.KeyName.PersonAddress] },
+            { "Organization Address", [Constants.KeyName.OrganizationAddress] },
+            { "User Address", [Constants.KeyName.UserAddress] },
+            { "Location Address", [Constants.KeyName.LocationAddress]}
+        };
     }
 }
