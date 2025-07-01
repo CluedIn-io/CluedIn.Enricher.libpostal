@@ -134,6 +134,14 @@ namespace CluedIn.Provider.Libpostal
             { "vocabKeyPrefix", LibpostalVocabulary.Location.KeyPrefix},
             { "autoSubmission", false },
             { "dataSourceSetId", string.Empty },
+        }
+
+        public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() 
+        {
+            { "Person Address", [Constants.KeyName.PersonAddress] },
+            { "Organization Address", [Constants.KeyName.OrganizationAddress] },
+            { "User Address", [Constants.KeyName.UserAddress] },
+            { "Location Address", [Constants.KeyName.LocationAddress]}
         };
     }
 }
