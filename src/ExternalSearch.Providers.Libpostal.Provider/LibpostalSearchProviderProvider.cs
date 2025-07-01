@@ -131,10 +131,10 @@ namespace CluedIn.Provider.Libpostal
             { "origin", Constants.ProviderName.ToCamelCase() },
             { "originField", string.Empty },
             { "nameKeyField", string.Empty },
-            { "vocabKeyPrefix", LibpostalVocabulary.Location.KeyPrefix},
+            { "vocabKeyPrefix", LibpostalVocabulary.Location.KeyPrefix },
             { "autoSubmission", false },
             { "dataSourceSetId", string.Empty },
-        }
+        };
 
         public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() 
         {
