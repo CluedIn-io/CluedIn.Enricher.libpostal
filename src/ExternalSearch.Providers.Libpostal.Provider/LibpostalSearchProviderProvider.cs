@@ -10,6 +10,7 @@ using CluedIn.Core.Providers;
 using CluedIn.Core.Webhooks;
 using CluedIn.ExternalSearch;
 using CluedIn.ExternalSearch.Providers.Libpostal;
+using CluedIn.ExternalSearch.Providers.Libpostal.Vocabularies;
 using CluedIn.Providers.Models;
 using Constants = CluedIn.ExternalSearch.Providers.Libpostal.Constants;
 
@@ -119,5 +120,28 @@ namespace CluedIn.Provider.Libpostal
         public IEnumerable<Control> Properties { get; } = Constants.Properties;
         public Guide Guide { get; } = Constants.Guide;
         public new IntegrationType Type { get; } = Constants.IntegrationType;
+        public bool SupportsEnricherV2 => true;
+        public Dictionary<string, object> ExtraInfo { get; } = new()
+        {
+            { "autoMap", true },
+            { "useEnricherOriginEntityCode", true },
+            { "supportConfidenceScore", false }, // for UI
+            { "minConfidenceScore", 0 }, // for UI
+            { "maxConfidenceScore", 100 }, // for UI
+            { "origin", Constants.ProviderName.ToCamelCase() },
+            { "originField", string.Empty },
+            { "nameKeyField", string.Empty },
+            { "vocabKeyPrefix", LibpostalVocabulary.Location.KeyPrefix },
+            { "autoSubmission", false },
+            { "dataSourceSetId", string.Empty },
+        };
+
+        public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() 
+        {
+            { "Person Address", [Constants.KeyName.PersonAddress] },
+            { "Organization Address", [Constants.KeyName.OrganizationAddress] },
+            { "User Address", [Constants.KeyName.UserAddress] },
+            { "Location Address", [Constants.KeyName.LocationAddress]}
+        };
     }
 }
