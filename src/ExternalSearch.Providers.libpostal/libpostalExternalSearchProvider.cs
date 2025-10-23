@@ -84,6 +84,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             //}
 
             var entityType = request.EntityMetaData.EntityType;
+            var entityName = !string.IsNullOrEmpty(request.EntityMetaData.Name) ? request.EntityMetaData.Name : request.EntityMetaData.DisplayName;
 
             var configMap           = config.ToDictionary();
             var personAddress       = GetValue(request, configMap, Constants.KeyName.PersonAddress, Core.Data.Vocabularies.Vocabularies.CluedInPerson.HomeAddress);
@@ -91,7 +92,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             var userAddress         = GetValue(request, configMap, Constants.KeyName.UserAddress, Core.Data.Vocabularies.Vocabularies.CluedInUser.HomeAddress);
             var locationAddress     = GetValue(request, configMap, Constants.KeyName.LocationAddress, Core.Data.Vocabularies.Vocabularies.CluedInLocation.Address);
 
-
+            var queriesGenerated = false;
             if (personAddress != null && personAddress.Count > 0)
             {
                 foreach (var item in personAddress)
@@ -100,6 +101,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                     {
                         {"body", item }
                     };
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
             }
@@ -111,6 +113,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                     {
                         {"body", item }
                     };
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
             }
@@ -122,6 +125,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                     {
                         {"body", item }
                     };
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
             }
@@ -133,8 +137,14 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
                     {
                         {"body", item }
                     };
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, queryBody);
                 }
+            }
+
+            if (!queriesGenerated)
+            {
+                throw new Exception($"Unable to generate queries for {entityName}. Address is empty.");
             }
         }
 
