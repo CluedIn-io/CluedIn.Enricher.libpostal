@@ -166,13 +166,13 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
         {
             var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
-            if (url.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(url))
             {
                 throw new Exception("Bad configuration");
             }
 
             var client = new RestClient(url);
-            var request = new RestRequest("parser", Method.POST);
+            var request = new RestRequest("parser", Method.Post);
             string address = null;
             request.AddHeader("Content-type", "application/json");
             if (query.QueryParameters.ContainsKey("body"))
@@ -187,7 +187,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteTaskAsync<LibpostalResponse>(request).Result;
+            var response = client.ExecuteAsync<LibpostalResponse>(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -245,13 +245,13 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         public ConnectionVerificationResult VerifyConnection(ExecutionContext context, IReadOnlyDictionary<string, object> config)
         {
             var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
-            if (url.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(url))
             {
                 return new ConnectionVerificationResult(false, "Bad configuration: Invalid url");
             }
 
             var client = new RestClient(url);
-            var request = new RestRequest("parser", Method.POST);
+            var request = new RestRequest("parser", Method.Post);
             var address = "Belgrave House, 76 Buckingham Palace Road";
             request.AddHeader("Content-type", "application/json");
             request.AddJsonBody(new queryBody() { query = address });
@@ -266,7 +266,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             return ConstructVerifyConnectionResponse(response);
         }
 
-        private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(RestResponse response)
         {
             var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
             if (response.ErrorException != null)
