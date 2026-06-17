@@ -214,7 +214,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         {
             if (result is IExternalSearchQueryResult<LibpostalResponse> libpostalResult)
             {
-                var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+                var code = new EntityCode(request.EntityMetaData.EntityType, "libpostal", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
                 var clue = new Clue(code, context.Organization);
                 PopulateMetadata(clue.Data.EntityData, libpostalResult, request);
                 return new[] { clue };
@@ -301,7 +301,8 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
         private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<LibpostalResponse> resultItem, IExternalSearchRequest request)
         {
-            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "libpostal", $"{request.Queries.FirstOrDefault()?.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+            var queryKey = request.Queries.FirstOrDefault(x => x.Id == resultItem.QueryId)?.QueryKey ?? request.Queries.FirstOrDefault()?.QueryKey;
+            var code = new EntityCode(request.EntityMetaData.EntityType, "libpostal", $"{queryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
 
             metadata.EntityType = request.EntityMetaData.EntityType;
 
