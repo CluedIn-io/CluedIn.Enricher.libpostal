@@ -10,6 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExternalSearch.Providers.Libpostal\ExternalSearch.Providers.Libpostal.csproj" />
+    <ProjectReference Include="..\ExternalSearch.Providers.libpostal\ExternalSearch.Providers.libpostal.csproj" />
   </ItemGroup>
 </Project>

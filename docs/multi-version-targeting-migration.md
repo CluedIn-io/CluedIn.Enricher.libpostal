@@ -117,6 +117,32 @@ Same family every enricher migrated so far has hit. Two call sites in
 No other API breaks — no custom `ISerializer`, no transitive-dependency version surprise like
 Brreg/CompanyHouse/CVR/DuckDuckGo hit with `Nager.PublicSuffix` (this repo doesn't reference it).
 
+### Repo-specific issue found only by real CI, not local builds: `ProjectReference` casing
+
+**First CI run (build 151983) failed all three legs** with `CS0234: The type or namespace name
+'Providers' does not exist in the namespace 'CluedIn.ExternalSearch'` in
+`Provider.ExternalSearch.Libpostal.csproj`. Root cause, visible in the log:
+
+```
+Skipping project ".../src/ExternalSearch.Providers.Libpostal/ExternalSearch.Providers.Libpostal.csproj" because it was not found.
+```
+
+`Provider.ExternalSearch.Libpostal.csproj`'s `<ProjectReference>` points at
+`..\ExternalSearch.Providers.Libpostal\ExternalSearch.Providers.Libpostal.csproj` (capital `L`), but
+the actual folder/file on disk is `ExternalSearch.Providers.libpostal` (lowercase `l`, both the
+directory and the `.csproj` filename). This is a **pre-existing bug in the repo**, unrelated to
+this migration — it was never caught before because the old pipeline ran on
+`pool: vmImage: 'windows-latest'`, and Windows' case-insensitive filesystem silently tolerates the
+mismatch. Switching the pool to `ubuntu-22.04` (matching every other migrated repo) exposed it, the
+same category of bug the MasterDataServices doc's "Linux case-sensitivity" section describes for
+resource files, just hitting a `ProjectReference` path instead. Local builds on this (Windows) dev
+machine never caught it either, for the same reason.
+
+Fixed by correcting the `ProjectReference` path to match the real on-disk casing. The `.sln`'s
+project entry has the same casing mismatch but is unaffected — the multi-version template discovers
+and builds `.csproj` files directly via `Get-ChildItem -Recurse -Filter *.csproj`, never touching
+the `.sln`, so it was left alone as out of scope.
+
 ---
 
 ## Step 7 — Reset the semantic version (`GitVersion.yml`)
@@ -156,6 +182,9 @@ Verified directly with the pipeline's pinned `GitVersion.Tool 5.9.0`: `FullSemVe
 - [x] Integration test csproj — conditional xunit v2/v3 + AutoFixture selection added
 - [x] Source — `#if CLUEDIN_V50` guards for the RestSharp `Method.Post`/`POST` and
       `ConstructVerifyConnectionResponse` parameter-type breaks (3 call sites)
+- [x] Fixed a pre-existing `ProjectReference` casing bug (`Libpostal` vs `libpostal`) that only
+      surfaced once CI moved from `windows-latest` to `ubuntu-22.04` — caught by real CI, not local
+      builds
 - [x] `GitVersion.yml` — merged into existing `ignore:` block; `next-version: 1.0`;
       `commits-before: 2026-06-20T00:00:00`; verified `1.0.0` with the pinned GitVersion.Tool 5.9.0
 - [ ] Push branch and confirm the actual Azure DevOps pipeline run is green end-to-end
