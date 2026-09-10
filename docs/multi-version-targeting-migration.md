@@ -187,4 +187,4 @@ Verified directly with the pipeline's pinned `GitVersion.Tool 5.9.0`: `FullSemVe
       builds
 - [x] `GitVersion.yml` — merged into existing `ignore:` block; `next-version: 1.0`;
       `commits-before: 2026-06-20T00:00:00`; verified `1.0.0` with the pinned GitVersion.Tool 5.9.0
-- [ ] Push branch and confirm the actual Azure DevOps pipeline run is green end-to-end
+- [x] Push branch and confirm the actual Azure DevOps pipeline run is green end-to-end — PR #38: first run (build 151983) failed all three legs on the `ProjectReference` casing bug above; fixed, re-ran (build 151988), all three legs + `Multi-version: publish` passed
