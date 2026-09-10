@@ -1,21 +1,36 @@
 <Project>
   <PropertyGroup Label="Dependency Versions">
     <_AutoFixture>5.0.0-preview0012</_AutoFixture>
-    <_CluedIn>5.0.0-*</_CluedIn>
+    <!-- Guarded so the pipeline's -p:_CluedIn=<version> per build leg wins; Directory.Build.props
+         sets the same default/guard earlier for DefineConstants derivation. -->
+    <_CluedIn Condition="'$(_CluedIn)' == ''">5.0.0-*</_CluedIn>
   </PropertyGroup>
   <ItemGroup>
     <!--
-        Specified versions for dependencies in test projects
+        Specified versions for dependencies in test projects, common to every target
 
         MUST SPECIFY IN CSPROJ AS <PackageReference Name="<depName>" />
     -->
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.3.0" />
-    <PackageReference Update="AutoFixture.Xunit3" Version="$(_AutoFixture)" />
     <PackageReference Update="coverlet.msbuild" Version="2.8.0" />
-    <PackageReference Update="xunit.v3" Version="3.2.2" />
-    <PackageReference Update="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageReference Update="Moq" Version="4.13.1" />
     <PackageReference Update="Shouldly" Version="3.0.2" />
+  </ItemGroup>
+  <!-- Below CluedIn 5.0.0 (net6.0) - xunit v2 / AutoFixture.Xunit2 / older Microsoft.NET.Test.Sdk,
+       matching the 4.x release lines before this repo's own tooling moved to net10.0/xunit v3 on
+       develop. The newer xunit.v3/Microsoft Testing Platform-based tooling does not support net6.0. -->
+  <ItemGroup Condition="$([MSBuild]::VersionLessThan('$(_CluedIn)', '5.0.0'))">
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Update="AutoFixture.Xunit2" Version="4.18.0" />
+    <PackageReference Update="xunit" Version="2.9.3" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <!-- CluedIn 5.0.0+ (this repo's own default) - the current xunit.v3/Microsoft Testing
+       Platform-based tooling. -->
+  <ItemGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(_CluedIn)', '5.0.0'))">
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Update="AutoFixture.Xunit3" Version="$(_AutoFixture)" />
+    <PackageReference Update="xunit.v3" Version="3.2.2" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
   <ItemGroup>
     <!--

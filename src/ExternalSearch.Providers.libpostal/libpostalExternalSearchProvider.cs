@@ -172,7 +172,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             }
 
             var client = new RestClient(url);
+#if CLUEDIN_V50
             var request = new RestRequest("parser", Method.Post);
+#else
+            var request = new RestRequest("parser", Method.POST);
+#endif
             string address = null;
             request.AddHeader("Content-type", "application/json");
             if (query.QueryParameters.ContainsKey("body"))
@@ -251,7 +255,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             }
 
             var client = new RestClient(url);
+#if CLUEDIN_V50
             var request = new RestRequest("parser", Method.Post);
+#else
+            var request = new RestRequest("parser", Method.POST);
+#endif
             var address = "Belgrave House, 76 Buckingham Palace Road";
             request.AddHeader("Content-type", "application/json");
             request.AddJsonBody(new queryBody() { query = address });
@@ -266,7 +274,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             return ConstructVerifyConnectionResponse(response);
         }
 
+#if CLUEDIN_V50
         private ConnectionVerificationResult ConstructVerifyConnectionResponse(RestResponse response)
+#else
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+#endif
         {
             var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
             if (response.ErrorException != null)
