@@ -191,17 +191,16 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteAsync<LibpostalResponse>(request).Result;
+            var response = client.ExecuteAsync(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Content != null)
                 {
-                    var data = new LibpostalResponse();
-                    foreach (var item in JsonConvert.DeserializeObject<List<Items>>(response.Content))
+                    var data = new LibpostalResponse
                     {
-                        data.Items.Add(item);
-                    }
+                        Items = JsonConvert.DeserializeObject<List<Items>>(response.Content) ?? new List<Items>()
+                    };
                     yield return new ExternalSearchQueryResult<LibpostalResponse>(query, data);
                 }
             }
@@ -264,7 +263,7 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             request.AddHeader("Content-type", "application/json");
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteAsync<LibpostalResponse>(request).Result;
+            var response = client.ExecuteAsync(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK && response.Content != null)
             {
