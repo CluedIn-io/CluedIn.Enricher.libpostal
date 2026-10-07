@@ -166,13 +166,17 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
         {
             var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
-            if (url.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(url))
             {
                 throw new Exception("Bad configuration");
             }
 
             var client = new RestClient(url);
+#if CLUEDIN_V50
+            var request = new RestRequest("parser", Method.Post);
+#else
             var request = new RestRequest("parser", Method.POST);
+#endif
             string address = null;
             request.AddHeader("Content-type", "application/json");
             if (query.QueryParameters.ContainsKey("body"))
@@ -187,17 +191,16 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
 
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteTaskAsync<LibpostalResponse>(request).Result;
+            var response = client.ExecuteAsync(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 if (response.Content != null)
                 {
-                    var data = new LibpostalResponse();
-                    foreach (var item in JsonConvert.DeserializeObject<List<Items>>(response.Content))
+                    var data = new LibpostalResponse
                     {
-                        data.Items.Add(item);
-                    }
+                        Items = JsonConvert.DeserializeObject<List<Items>>(response.Content) ?? new List<Items>()
+                    };
                     yield return new ExternalSearchQueryResult<LibpostalResponse>(query, data);
                 }
             }
@@ -245,18 +248,22 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
         public ConnectionVerificationResult VerifyConnection(ExecutionContext context, IReadOnlyDictionary<string, object> config)
         {
             var url = ConfigurationManagerEx.AppSettings.GetValue("ExternalSearch.Libpostal.url", "");
-            if (url.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(url))
             {
                 return new ConnectionVerificationResult(false, "Bad configuration: Invalid url");
             }
 
             var client = new RestClient(url);
+#if CLUEDIN_V50
+            var request = new RestRequest("parser", Method.Post);
+#else
             var request = new RestRequest("parser", Method.POST);
+#endif
             var address = "Belgrave House, 76 Buckingham Palace Road";
             request.AddHeader("Content-type", "application/json");
             request.AddJsonBody(new queryBody() { query = address });
 
-            var response = client.ExecuteAsync<LibpostalResponse>(request).Result;
+            var response = client.ExecuteAsync(request).Result;
 
             if (response.StatusCode == HttpStatusCode.OK && response.Content != null)
             {
@@ -266,7 +273,11 @@ namespace CluedIn.ExternalSearch.Providers.Libpostal
             return ConstructVerifyConnectionResponse(response);
         }
 
+#if CLUEDIN_V50
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(RestResponse response)
+#else
         private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+#endif
         {
             var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
             if (response.ErrorException != null)
