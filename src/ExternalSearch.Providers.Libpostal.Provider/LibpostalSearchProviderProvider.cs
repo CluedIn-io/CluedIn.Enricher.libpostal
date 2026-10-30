@@ -134,6 +134,7 @@ namespace CluedIn.Provider.Libpostal
             { "vocabKeyPrefix", LibpostalVocabulary.Location.KeyPrefix },
             { "autoSubmission", false },
             { "dataSourceSetId", string.Empty },
+            { "fieldGroups", Constants.FieldGroups }, // for UI
         };
 
         public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() 
